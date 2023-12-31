@@ -9,7 +9,8 @@ public class playerMovement : MonoBehaviour
     private Transform playerTransform;
     [SerializeField] private Camera cursorCamera;
     [SerializeField] private float walkModifier;
-    [SerializeField] private float speedModifier;
+    [SerializeField] private float sprintModifier;
+    [SerializeField] private float slowWalkModifier;
     [SerializeField] private float rotationSpeed;
     [SerializeField] private float aimRoationSpeed;
     [SerializeField] Collider planeCollider;
@@ -43,18 +44,18 @@ public class playerMovement : MonoBehaviour
         }
 
         if(Input.GetKey(KeyCode.LeftShift)) {
-            rb.velocity *= speedModifier * Time.deltaTime;
+            rb.velocity *= sprintModifier * Time.deltaTime;
         }
-        
+    
         if(Input.GetMouseButton(1)) {
-            rb.velocity /= speedModifier * Time.deltaTime;
+            rb.velocity /= slowWalkModifier * Time.deltaTime;
         }
         
     }
 
     void rotatePlayerToMouse () {
         Vector3 mouseInput = Input.mousePosition;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Ray ray = cursorCamera.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         if(Physics.Raycast(ray, out hit)) {
             if(hit.collider == planeCollider) {
