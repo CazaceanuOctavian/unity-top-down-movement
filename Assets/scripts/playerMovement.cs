@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,12 +7,12 @@ public class playerMovement : MonoBehaviour
 {
     private Rigidbody rb; 
     private Transform playerTransform;
-
+    [SerializeField] private Camera cursorCamera;
     [SerializeField] private float walkModifier;
     [SerializeField] private float speedModifier;
     [SerializeField] private float rotationSpeed;
     [SerializeField] private float aimRoationSpeed;
-
+    [SerializeField] Collider planeCollider;
     
     
     void Start()
@@ -53,11 +54,16 @@ public class playerMovement : MonoBehaviour
 
     void rotatePlayerToMouse () {
         Vector3 mouseInput = Input.mousePosition;
-        Debug.Log(mouseInput);
-        Vector3 targetPosition = Camera.main.ScreenToWorldPoint(new Vector3(mouseInput.x, mouseInput.y, 10f));
-        Vector3 directionToMouse = targetPosition - transform.position;
-        float angle = Mathf.Atan2(directionToMouse.x, directionToMouse.y) * Mathf.Rad2Deg;
-        Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.up);
-        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, aimRoationSpeed * Time.fixedDeltaTime);
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if(Physics.Raycast(ray, out hit)) {
+            if(hit.collider == planeCollider) {
+                //TODO --> make the movement smooth
+                //Quaternion rotation = Quaternion.LookRotation(new Vector3(hit.point.x, transform.position.y, hit.point.z));
+                //transform.rotation = rotation;
+                transform.LookAt(new Vector3(hit.point.x, transform.position.y, hit.point.z));
+            }
+        }
+
     }
 }
