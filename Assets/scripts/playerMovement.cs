@@ -31,7 +31,7 @@ public class playerMovement : MonoBehaviour
     }
 
     void movePlayer () {
-        rb.velocity = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized * walkModifier * Time.deltaTime;
+        rb.velocity = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")).normalized * walkModifier * Time.deltaTime;
         
         //transform.Translate(movementDirection * speedVar * Time.deltaTime, Space.World);
 
