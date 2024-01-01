@@ -1658,9 +1658,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cursorCamera: {fileID: 526315675}
   walkModifier: 2
-  sprintModifier: 70
-  slowWalkModifier: 90
-  rotationSpeed: 450
+  sprintModifier: 2.6
+  slowWalkModifier: 0.8
+  rotationSpeed: 190
   aimRoationSpeed: 3
   planeCollider: {fileID: 273543217}
 --- !u!1 &486276458

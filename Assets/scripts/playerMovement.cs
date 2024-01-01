@@ -24,46 +24,48 @@ public class playerMovement : MonoBehaviour
         playerTransform = GetComponent<Transform>();
     }
 
-    // Update is called once per frame
     void FixedUpdate()
     {
-       movePlayer();
-       gatherInput();
-       if(Input.GetMouseButton(1)) {
+        gatherInput();
+        movePlayerSkewed();
+        if(Input.GetMouseButton(1)) {
             rotatePlayerToMouse();
-       }
+        }
     }
 
     void gatherInput() {
         _input = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
     }
 
-    void movePlayer () {
-        //used for setting character rotation twoards the direction that you are moving in --> walkModifer * Time.deltaTime may not be necessary
-        Vector3 velocityPlaceholder = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")).normalized * walkModifier * Time.deltaTime;
-        
-        var matrix = Matrix4x4.Rotate(Quaternion.Euler(0, 45, 0));
+    //movement to be used with ortographic camera
+    void movePlayerSkewed() {
+        if(_input != Vector3.zero) {
+            var matrix = Matrix4x4.Rotate(Quaternion.Euler(0, 45, 0));
 
-        var skewedInput = matrix.MultiplyPoint3x4(_input);
+            var skewedInput = matrix.MultiplyPoint3x4(_input);
 
-        //movement to be used with isometric camera
-        rb.MovePosition(transform.position + skewedInput.normalized  * walkModifier * Time.deltaTime);
-        
-        //TODO --> clean up if statement
-        if(velocityPlaceholder != Vector3.zero && !Input.GetMouseButton(1)) {
-            Quaternion toRotation = Quaternion.LookRotation(skewedInput, Vector3.up);
+            //if the player is not aiming and is not sprinting
+            if(!Input.GetMouseButton(1) && !Input.GetKey(KeyCode.LeftShift)) {
+                rb.MovePosition(transform.position + skewedInput.normalized  * walkModifier * Time.deltaTime);
+                //rotate twoards the position that the player is facing
+                Quaternion toRotation = Quaternion.LookRotation(skewedInput, Vector3.up);
 
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
+
+            }
+            //if the player is aiming don't rotate because the player model is already rotating twoards mouse
+            else if (Input.GetMouseButton(1)) {
+                rb.MovePosition(transform.position + skewedInput.normalized  * slowWalkModifier * Time.deltaTime);
+            }
+            //if the player is sprinting 
+            else {
+                rb.MovePosition(transform.position + skewedInput.normalized  * sprintModifier * Time.deltaTime);
+                //rotate twoards the position that the player is facing
+                 Quaternion toRotation = Quaternion.LookRotation(skewedInput, Vector3.up);
+
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
+            }
         }
-
-        if(Input.GetKey(KeyCode.LeftShift)) {
-            rb.velocity *= sprintModifier * Time.deltaTime;
-        }
-    
-        if(Input.GetMouseButton(1)) {
-            rb.velocity /= slowWalkModifier * Time.deltaTime;
-        }
-        
     }
 
     void rotatePlayerToMouse () {
@@ -72,10 +74,8 @@ public class playerMovement : MonoBehaviour
         RaycastHit hit;
         if(Physics.Raycast(ray, out hit)) {
             if(hit.collider == planeCollider) {
-                //TODO --> make the movement smooth
-                //Quaternion rotation = Quaternion.LookRotation(new Vector3(hit.point.x, transform.position.y, hit.point.z));
-                //transform.rotation = rotation;
-                transform.LookAt(new Vector3(hit.point.x, transform.position.y, hit.point.z));
+                Quaternion toRotation = Quaternion.LookRotation(new Vector3(hit.point.x, transform.position.y, hit.point.z) - transform.position);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
             }
         }
 
