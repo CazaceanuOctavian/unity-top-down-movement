@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class playerMovement : MonoBehaviour
@@ -14,8 +15,9 @@ public class playerMovement : MonoBehaviour
     [SerializeField] private float rotationSpeed;
     [SerializeField] private float aimRoationSpeed;
     [SerializeField] Collider planeCollider;
+    private Vector3 _input;
     
-    
+    //--> TODO REFACTOR SCRIPT (but works for now)
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -26,19 +28,30 @@ public class playerMovement : MonoBehaviour
     void FixedUpdate()
     {
        movePlayer();
-
+       gatherInput();
        if(Input.GetMouseButton(1)) {
             rotatePlayerToMouse();
        }
     }
 
-    void movePlayer () {
-        rb.velocity = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")).normalized * walkModifier * Time.deltaTime;
-        
-        //transform.Translate(movementDirection * speedVar * Time.deltaTime, Space.World);
+    void gatherInput() {
+        _input = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+    }
 
-        if(rb.velocity != Vector3.zero && !Input.GetMouseButton(1)) {
-            Quaternion toRotation = Quaternion.LookRotation(rb.velocity, Vector3.up);
+    void movePlayer () {
+        //used for setting character rotation twoards the direction that you are moving in --> walkModifer * Time.deltaTime may not be necessary
+        Vector3 velocityPlaceholder = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")).normalized * walkModifier * Time.deltaTime;
+        
+        var matrix = Matrix4x4.Rotate(Quaternion.Euler(0, 45, 0));
+
+        var skewedInput = matrix.MultiplyPoint3x4(_input);
+
+        //movement to be used with isometric camera
+        rb.MovePosition(transform.position + skewedInput.normalized  * walkModifier * Time.deltaTime);
+        
+        //TODO --> clean up if statement
+        if(velocityPlaceholder != Vector3.zero && !Input.GetMouseButton(1)) {
+            Quaternion toRotation = Quaternion.LookRotation(skewedInput, Vector3.up);
 
             transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
         }
