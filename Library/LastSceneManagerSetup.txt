@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/SpeedTutor - Tutorial Scene - FREE/Scenes/SpeedTutor Test Scene.unity
+- path: Assets/Scenes/scene.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0
